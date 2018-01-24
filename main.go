@@ -1,15 +1,14 @@
 package main
 
 import (
-	"encoding/csv"
+	"bytes"
 	"encoding/xml"
 	"fmt"
-	"io/ioutil"
 	"os"
 )
 
-//const xmlFilePath = "xmlSamples/usersSocial.xml"
-const xmlFilePath = "xmlSamples/jampp_ztt_br.xml"
+// const xmlFilePath = "xmlSamples/jampp_ztt_br.xml"
+const xmlFilePath = "xmlSamples/usersSocial.xml"
 
 func main() {
 
@@ -21,27 +20,29 @@ func main() {
 	}
 	defer xmlFile.Close()
 
-	fmt.Println("Reading all...")
-	byteValue, _ := ioutil.ReadAll(xmlFile)
+	xmlDecoder := xml.NewDecoder(xmlFile)
 
-	fmt.Println("Unmarshal file...")
-	var products Products
-	xml.Unmarshal(byteValue, &products)
+	for {
+		currentToken, _ := xmlDecoder.Token()
+		if currentToken == nil {
+			break
+		}
 
-	productsLen := len(products.Products)
-	fmt.Printf("productsLen %d\n", productsLen)
+		switch currentToken.(type) {
 
-	w := csv.NewWriter(os.Stdout)
-	records := [][]string{
-		{"id", "title", "description"},
+		case xml.StartElement:
+			element := currentToken.(xml.StartElement)
+
+			fmt.Printf("StartElement: %s\n", element.Name.Local)
+
+		case xml.CharData:
+			value := bytes.TrimSpace([]byte(currentToken.(xml.CharData)))
+
+			if len(value) == 0 {
+				continue
+			}
+
+			fmt.Printf("CharData: %s\n", value)
+		}
 	}
-
-	fmt.Println("Printing...")
-	for i := 0; i < productsLen; i++ {
-		records = append(records, []string{
-			products.Products[i].Id, products.Products[i].Title,
-			products.Products[i].Description})
-	}
-
-	w.WriteAll(records)
 }
