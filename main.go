@@ -1,48 +1,58 @@
 package main
 
 import (
-	"bytes"
-	"encoding/xml"
 	"fmt"
+	"log"
 	"os"
+
+	"github.com/clbanning/mxj"
 )
 
 // const xmlFilePath = "xmlSamples/jampp_ztt_br.xml"
-const xmlFilePath = "xmlSamples/usersSocial.xml"
+const xmlFilePath = "https://s3.amazonaws.com/teste-products.dinda.com.br/Jampp.xml"
 
 func main() {
 
-	fmt.Println("Opening file...")
+	// response, err := http.Get(xmlFilePath)
+	// if err != nil {
+	// 	log.Panic(err)
+	// }
+	// defer response.Body.Close()
 
-	xmlFile, err := os.Open(xmlFilePath)
+	// mv, err := mxj.NewMapXmlReader(response.Body)
+
+	sampleXMLReader, err := os.Open("./xmlSamples/usersSocial.xml")
 	if err != nil {
-		fmt.Println(err)
+		log.Panic(err)
 	}
-	defer xmlFile.Close()
+	defer sampleXMLReader.Close()
 
-	xmlDecoder := xml.NewDecoder(xmlFile)
+	mv, err := mxj.NewMapXmlReader(sampleXMLReader)
 
-	for {
-		currentToken, _ := xmlDecoder.Token()
-		if currentToken == nil {
-			break
-		}
+	fmt.Printf("mv: %s", mv)
+	// xmlDecoder := xml.NewDecoder(response.Body)
 
-		switch currentToken.(type) {
+	// for {
+	// 	currentToken, _ := xmlDecoder.Token()
+	// 	if currentToken == nil {
+	// 		break
+	// 	}
 
-		case xml.StartElement:
-			element := currentToken.(xml.StartElement)
+	// 	switch currentToken.(type) {
 
-			fmt.Printf("StartElement: %s\n", element.Name.Local)
+	// 	case xml.StartElement:
+	// 		element := currentToken.(xml.StartElement)
 
-		case xml.CharData:
-			value := bytes.TrimSpace([]byte(currentToken.(xml.CharData)))
+	// 		fmt.Printf("StartElement: %s\n", element.Name.Local)
 
-			if len(value) == 0 {
-				continue
-			}
+	// 	case xml.CharData:
+	// 		value := bytes.TrimSpace([]byte(currentToken.(xml.CharData)))
 
-			fmt.Printf("CharData: %s\n", value)
-		}
-	}
+	// 		if len(value) == 0 {
+	// 			continue
+	// 		}
+
+	// 		fmt.Printf("CharData: %s\n", value)
+	// 	}
+	// }
 }
